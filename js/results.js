@@ -336,8 +336,10 @@
     html += '<table class="data-table">';
     html += '<thead><tr>';
     html += '<th>번호</th>';
-    App.SUBJECTS.forEach(function (s) { html += '<th>' + s + '</th>'; });
-    html += '<th>맞춘 문항수</th><th>총점</th><th>평균</th><th>반 석차</th>';
+    App.SUBJECTS.forEach(function (s) {
+      html += '<th>' + s + ' 점수</th><th>' + s + ' 정답수</th>';
+    });
+    html += '<th>총 정답수</th><th>총점</th><th>평균</th><th>반 석차</th>';
     html += '</tr></thead>';
     html += '<tbody>';
 
@@ -350,8 +352,10 @@
 
       App.SUBJECTS.forEach(function (subject) {
         var sc = sd[subject] || 0;
+        var sCorrect = sd[subject + '_정답수'] || 0;
         var colorClass = Results._getScoreColorClass(sc, 100);
         html += '<td class="' + colorClass + '">' + sc + '</td>';
+        html += '<td>' + sCorrect + ' / 25</td>';
       });
 
       var totalQ = App.SUBJECTS.length * App.QUESTIONS_PER_SUBJECT; // 75

@@ -67,8 +67,10 @@
   ExcelExport._addOverallSheet = function (wb, scores) {
     var data = [];
     var header = ['반', '번호'];
-    App.SUBJECTS.forEach(function (s) { header.push(s); });
-    header.push('맞춘 문항수', '총점', '평균', '전체석차');
+    App.SUBJECTS.forEach(function (s) {
+      header.push(s, s + ' 정답수');
+    });
+    header.push('총 정답수', '총점', '평균', '전체석차');
     data.push(header);
 
     // 모든 학생 데이터
@@ -93,13 +95,14 @@
       var row = [st.classNum, st.studentNum];
       App.SUBJECTS.forEach(function (subject) {
         row.push(st.data[subject] || 0);
+        row.push(st.data[subject + '_정답수'] || 0);
       });
       row.push(st.data.totalCorrect || 0, st.data.total, st.data.avg, st.data.rank);
       data.push(row);
     });
 
     var ws = XLSX.utils.aoa_to_sheet(data);
-    ExcelExport._setColumnWidths(ws, [6, 6, 8, 8, 8, 12, 8, 8, 10]);
+    ExcelExport._setColumnWidths(ws, [6, 6, 8, 12, 8, 12, 8, 12, 12, 8, 8, 10]);
     ExcelExport._boldHeader(ws, header.length);
     XLSX.utils.book_append_sheet(wb, ws, '전체성적');
   };
@@ -108,8 +111,10 @@
   ExcelExport._addClassSheet = function (wb, scores, classNum) {
     var data = [];
     var header = ['번호'];
-    App.SUBJECTS.forEach(function (s) { header.push(s); });
-    header.push('맞춘 문항수', '총점', '평균', '반석차');
+    App.SUBJECTS.forEach(function (s) {
+      header.push(s, s + ' 정답수');
+    });
+    header.push('총 정답수', '총점', '평균', '반석차');
     data.push(header);
 
     var studentCount = App.state.studentCounts[classNum] || 25;
@@ -120,13 +125,14 @@
       var row = [s];
       App.SUBJECTS.forEach(function (subject) {
         row.push(sd[subject] || 0);
+        row.push(sd[subject + '_정답수'] || 0);
       });
       row.push(sd.totalCorrect || 0, sd.total, sd.avg, sd.classRank || '-');
       data.push(row);
     }
 
     var ws = XLSX.utils.aoa_to_sheet(data);
-    ExcelExport._setColumnWidths(ws, [6, 8, 8, 8, 12, 8, 8, 8]);
+    ExcelExport._setColumnWidths(ws, [6, 8, 12, 8, 12, 8, 12, 12, 8, 8, 8]);
     ExcelExport._boldHeader(ws, header.length);
     XLSX.utils.book_append_sheet(wb, ws, classNum + '반');
   };
