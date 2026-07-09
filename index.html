@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="교사용 시험 답안 자동 채점 시스템 - 학생 답안 입력, 자동 채점, 성적 분석을 한 곳에서">
+  <title>📝 시험 채점 시스템</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="lib/xlsx.full.min.js"></script>
+  <script src="lib/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- App Header -->
+    <header class="app-header">
+      <div class="app-title">
+        <h1>📝 시험 채점 시스템</h1>
+        <span class="app-status" id="app-status">준비됨</span>
+      </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav id="main-nav">
+      <button class="nav-btn active" data-tab="setup">
+        <span class="nav-icon">⚙️</span>
+        <span class="nav-label">시험설정</span>
+      </button>
+      <button class="nav-btn" data-tab="answer-key">
+        <span class="nav-icon">📝</span>
+        <span class="nav-label">정답확인</span>
+      </button>
+      <button class="nav-btn" data-tab="grading">
+        <span class="nav-icon">✏️</span>
+        <span class="nav-label">답안입력</span>
+      </button>
+      <button class="nav-btn" data-tab="results">
+        <span class="nav-icon">📈</span>
+        <span class="nav-label">성적분석</span>
+      </button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Tab 3: Exam Setup (Now First Tab) -->
+      <div id="tab-setup" class="tab-content active">
+        <div class="section-header">
+          <h2>⚙️ 시험 설정</h2>
+          <p>담당 학급의 반 번호와 학생 수를 입력하세요</p>
+        </div>
+        
+        <div class="grading-selector" style="max-width: 500px; margin: 0 auto 24px; display: flex; flex-direction: column; gap: 20px; align-items: stretch;">
+          <div class="selector-group">
+            <label for="setup-class-num">담당 학급 (반)</label>
+            <input type="number" id="setup-class-num" value="1" min="1" max="20" style="width: 100%;">
+          </div>
+          <div class="selector-group">
+            <label for="setup-student-count">학급 학생 수 (명)</label>
+            <input type="number" id="setup-student-count" value="25" min="1" max="50" style="width: 100%;">
+          </div>
+          <button id="save-setup-btn" class="btn btn-primary" style="margin-top: 10px;">💾 설정 저장</button>
+        </div>
+      </div>
+
+      <!-- Tab 2: Answer Key Management -->
+      <div id="tab-answer-key" class="tab-content">
+        <div class="section-header">
+          <h2>📝 정답 확인</h2>
+        </div>
+        <div id="answer-key-tables"></div>
+      </div>
+
+      <!-- Tab 4: Grading (Answer Input) -->
+      <div id="tab-grading" class="tab-content">
+        <div class="section-header">
+          <h2>✏️ 답안 입력</h2>
+          <p>학생 답안을 입력하세요</p>
+        </div>
+        <!-- Selector Area -->
+        <div id="grading-selector" class="grading-selector">
+          <div class="selector-group">
+            <label>반 선택</label>
+            <select id="grading-class-select">
+              <option value="">반을 선택하세요</option>
+              <option value="1">1반</option>
+              <option value="2">2반</option>
+              <option value="3">3반</option>
+              <option value="4">4반</option>
+              <option value="5">5반</option>
+              <option value="6">6반</option>
+            </select>
+          </div>
+          <div class="selector-group">
+            <label>과목 선택</label>
+            <select id="grading-subject-select">
+              <option value="">과목을 선택하세요</option>
+              <option value="국어">국어</option>
+              <option value="수학">수학</option>
+              <option value="영어">영어</option>
+            </select>
+          </div>
+          <button id="grading-start-btn" class="btn btn-primary">채점 시작</button>
+        </div>
+        <!-- Grading Workspace -->
+        <div id="grading-workspace" class="grading-workspace" style="display:none; position: relative; min-height: 400px;">
+          <!-- Student Transition Overlay -->
+          <div id="grading-overlay" class="grading-overlay" style="display: none;"></div>
+          
+          <div class="grading-header">
+            <div id="grading-info" class="grading-info"></div>
+            <div id="grading-progress-container" class="progress-container">
+              <div class="progress-bar">
+                <div id="grading-progress" class="progress-fill"></div>
+              </div>
+              <span id="grading-progress-text"></span>
+            </div>
+          </div>
+          <div class="grading-main">
+            <div id="current-question-card" class="question-card"></div>
+            <div id="grading-input-area" class="grading-input-area"></div>
+          </div>
+          <div class="grading-nav">
+            <button id="grading-prev-btn" class="btn btn-secondary">◀ 이전</button>
+            <button id="grading-skip-btn" class="btn btn-secondary">건너뛰기 ▶</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 5: Results (Grade Analysis) -->
+      <div id="tab-results" class="tab-content">
+        <div class="section-header">
+          <h2>📈 성적 분석</h2>
+          <p>채점 결과를 확인하고 엑셀로 내보냅니다</p>
+        </div>
+        <div class="results-toolbar">
+          <select id="results-view-select">
+            <option value="class">전체 성적</option>
+            <option value="item-analysis">문항 분석</option>
+          </select>
+          <select id="results-subject-filter" style="display: none;"></select>
+          <button id="export-excel-btn" class="btn btn-primary">📥 엑셀 다운로드</button>
+        </div>
+        <div id="results-content"></div>
+        <div class="charts-grid" id="charts-container"></div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <!-- App Scripts -->
+  <script src="js/app.js"></script>
+  <script src="js/answer-key.js"></script>
+  <script src="js/grading.js"></script>
+  <script src="js/results.js"></script>
+  <script src="js/excel-export.js"></script>
+</body>
+</html>
