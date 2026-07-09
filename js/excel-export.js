@@ -68,7 +68,7 @@
     var data = [];
     var header = ['반', '번호'];
     App.SUBJECTS.forEach(function (s) { header.push(s); });
-    header.push('총점', '평균', '전체석차');
+    header.push('맞춘 문항수', '총점', '평균', '전체석차');
     data.push(header);
 
     // 모든 학생 데이터
@@ -94,12 +94,12 @@
       App.SUBJECTS.forEach(function (subject) {
         row.push(st.data[subject] || 0);
       });
-      row.push(st.data.total, st.data.avg, st.data.rank);
+      row.push(st.data.totalCorrect || 0, st.data.total, st.data.avg, st.data.rank);
       data.push(row);
     });
 
     var ws = XLSX.utils.aoa_to_sheet(data);
-    ExcelExport._setColumnWidths(ws, [6, 6, 8, 8, 8, 8, 8, 10]);
+    ExcelExport._setColumnWidths(ws, [6, 6, 8, 8, 8, 12, 8, 8, 10]);
     ExcelExport._boldHeader(ws, header.length);
     XLSX.utils.book_append_sheet(wb, ws, '전체성적');
   };
@@ -109,7 +109,7 @@
     var data = [];
     var header = ['번호'];
     App.SUBJECTS.forEach(function (s) { header.push(s); });
-    header.push('총점', '평균', '반석차');
+    header.push('맞춘 문항수', '총점', '평균', '반석차');
     data.push(header);
 
     var studentCount = App.state.studentCounts[classNum] || 25;
@@ -121,12 +121,12 @@
       App.SUBJECTS.forEach(function (subject) {
         row.push(sd[subject] || 0);
       });
-      row.push(sd.total, sd.avg, sd.classRank || '-');
+      row.push(sd.totalCorrect || 0, sd.total, sd.avg, sd.classRank || '-');
       data.push(row);
     }
 
     var ws = XLSX.utils.aoa_to_sheet(data);
-    ExcelExport._setColumnWidths(ws, [6, 8, 8, 8, 8, 8, 8]);
+    ExcelExport._setColumnWidths(ws, [6, 8, 8, 8, 12, 8, 8, 8]);
     ExcelExport._boldHeader(ws, header.length);
     XLSX.utils.book_append_sheet(wb, ws, classNum + '반');
   };

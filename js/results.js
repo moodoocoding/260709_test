@@ -92,12 +92,14 @@
       for (var s = 1; s <= studentCount; s++) {
         scores[c][s] = {};
         var total = 0;
+        var totalCorrect = 0;
 
         App.SUBJECTS.forEach(function (subject) {
           var key = c + '_' + subject;
           var answerKey = App.state.answerKey[subject] || [];
           var studentAnswers = (App.state.answers[key] && App.state.answers[key][s]) || [];
           var subjectScore = 0;
+          var subjectCorrect = 0;
 
           for (var q = 0; q < App.QUESTIONS_PER_SUBJECT; q++) {
             var answer = studentAnswers[q];
@@ -109,20 +111,25 @@
               var correctNum = App.CIRCLE_TO_NUM[correct.answer];
               if (answer === correctNum) {
                 subjectScore += App.POINTS_PER_QUESTION;
+                subjectCorrect++;
               }
             } else {
               // 주관식/복수정답: true → 정답
               if (answer === true) {
                 subjectScore += App.POINTS_PER_QUESTION;
+                subjectCorrect++;
               }
             }
           }
 
           scores[c][s][subject] = subjectScore;
+          scores[c][s][subject + '_정답수'] = subjectCorrect;
           total += subjectScore;
+          totalCorrect += subjectCorrect;
         });
 
         scores[c][s].total = total;
+        scores[c][s].totalCorrect = totalCorrect;
         scores[c][s].avg = Math.round((total / App.SUBJECTS.length) * 10) / 10;
 
         allStudentScores.push({
@@ -330,7 +337,7 @@
     html += '<thead><tr>';
     html += '<th>번호</th>';
     App.SUBJECTS.forEach(function (s) { html += '<th>' + s + '</th>'; });
-    html += '<th>총점</th><th>평균</th><th>반 석차</th>';
+    html += '<th>맞춘 문항수</th><th>총점</th><th>평균</th><th>반 석차</th>';
     html += '</tr></thead>';
     html += '<tbody>';
 
@@ -347,6 +354,8 @@
         html += '<td class="' + colorClass + '">' + sc + '</td>';
       });
 
+      var totalQ = App.SUBJECTS.length * App.QUESTIONS_PER_SUBJECT; // 75
+      html += '<td>' + (sd.totalCorrect || 0) + ' / ' + totalQ + '</td>';
       html += '<td><strong>' + sd.total + '</strong></td>';
       html += '<td>' + sd.avg + '</td>';
       html += '<td>' + (sd.classRank || '-') + '</td>';
